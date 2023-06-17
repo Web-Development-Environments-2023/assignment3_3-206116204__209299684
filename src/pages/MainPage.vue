@@ -1,45 +1,166 @@
 <template>
   <div class="container">
-    <h1 class="title">Main Page</h1>
-    <RecipePreviewList title="Randome Recipes" class="RandomRecipes center" />
-    <router-link v-if="!$root.store.username" to="/login" tag="button">You need to Login to vue this</router-link>
-    {{ !$root.store.username }}
-    <RecipePreviewList
-      title="Last Viewed Recipes"
-      :class="{
-        RandomRecipes: true,
-        blur: !$root.store.username,
-        center: true
-      }"
-      disabled
-    ></RecipePreviewList>
-    <!-- <div
-      style="position: absolute;top: 70%;left: 50%;transform: translate(-50%, -50%);"
-    >
-      Centeredasdasdad
-    </div>-->
+    <h1 class="title" style="color: #1b1b1b; padding-bottom: 30px">Recipes</h1>
+    <b-container fluid class="recipe-container">
+      <h3 class="explore-badge">Explore these recipes</h3>
+      <div class="recipe-row">
+        <div class="recipe-column">
+          <RandomRecipe :recipe="RecipeRandom1"></RandomRecipe>
+        </div>
+        <div class="recipe-column">
+          <RandomRecipe :recipe="RecipeRandom2"></RandomRecipe>
+        </div>
+        <div class="recipe-column">
+          <RandomRecipe :recipe="RecipeRandom3"></RandomRecipe>
+        </div>
+      </div>
+      <b-button variant="info" @click="reloadPage">
+        <b-spinner type="grow" label="Loading..."></b-spinner> Refresh
+      </b-button>
+    </b-container>
+    <div id="Guest" v-if="!$root.store.username">
+      <LoginPage class="comp" style="margin-top: -700px; margin-left: 700px"></LoginPage>
+    </div>
+    <div id="UserLoggedIn" v-else>
+      <h3 class="watched-badge">Show my last 3 Watched recipes:</h3>
+      <PreviewRecipe :recipe="LastWatch1" v-if="LastWatch1"></PreviewRecipe>
+      <PreviewRecipe :recipe="LastWatch2" v-if="LastWatch2"></PreviewRecipe>
+      <PreviewRecipe :recipe="LastWatch3" v-if="LastWatch3"></PreviewRecipe>
+    </div>
   </div>
 </template>
 
 <script>
-import RecipePreviewList from "../components/RecipePreviewList";
+import RandomRecipe from "../components/RandomRecipe";
+import LoginPage from "../pages/LoginPage";
+import PreviewRecipe from "../components/PreviewRecipe";
+
 export default {
   components: {
-    RecipePreviewList
-  }
+    RandomRecipe,
+    LoginPage,
+    PreviewRecipe,
+  },
+  data() {
+    return {
+      RecipeRandom1: {},
+      RecipeRandom2: {},
+      RecipeRandom3: {},
+      LastWatch1: "",
+      LastWatch2: "",
+      LastWatch3: "",
+    };
+  },
+  methods: {
+    reloadPage() {
+      window.location.reload();
+    },
+    async getRandom3Recipes() {
+      console.log(this.$root.store.server_domain);
+      console.log(this.$root.store.server_domain + "/recipes/random3recipes");
+      try {
+        const response = await this.axios.get(
+          this.$root.store.server_domain + "/recipes/random3recipes"
+        );
+        const RecipeData = response.data;
+        this.RecipeRandom1 = RecipeData[0];
+        this.RecipeRandom2 = RecipeData[1];
+        this.RecipeRandom3 = RecipeData[2];
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async getUserLast3Watch() {
+      try {
+        const response = await this.axios.get(
+          this.$root.store.server_domain + "/users/user_last_3_watch"
+        );
+        await setTimeout(10000);
+        const RecipeData = response.data;
+        this.LastWatch1 = RecipeData[0].History_Watch_R1;
+        this.LastWatch2 = RecipeData[0].History_Watch_R2;
+        this.LastWatch3 = RecipeData[0].History_Watch_R3;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  },
+  mounted() {
+    this.getRandom3Recipes();
+    this.getUserLast3Watch();
+  },
 };
 </script>
 
 <style lang="scss" scoped>
+.container {
+  padding-top: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.recipe-container {
+  width: 600px;
+  margin-left: -50px;
+  padding: 30px;
+  background-color: #212529;
+  border-radius: 10px;
+  color: black;
+  font-family: "Agency FB", sans-serif;
+}
+
+.title {
+  font-size: 80px;
+  font-family: "Agency FB", serif;
+  font-weight: bold;
+  margin-top: 0;
+  color: #fff;
+}
+
+.explore-badge {
+  color: #9eebcf;
+  font-family: "Agency FB", sans-serif;
+  font-size: 50px;
+  margin-left: 80px;
+  margin-top: -30px;
+}
+
+.watched-badge {
+  margin-top: 30px;
+  color: #9eebcf;
+}
+
+.recipe-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.recipe-column {
+  width: 48%;
+}
+
 .RandomRecipes {
   margin: 10px 0 10px;
 }
-.blur {
-  -webkit-filter: blur(5px); /* Safari 6.0 - 9.0 */
-  filter: blur(2px);
+
+.b-button {
+  margin-top: 30px;
 }
-::v-deep .blur .recipe-preview {
-  pointer-events: none;
-  cursor: default;
+
+.comp {
+  margin-top: -1300px;
+  margin-right: 50px;
+}
+
+#UserLoggedIn {
+  margin-top: -1500px;
+  margin-left: 600px;
+}
+
+.elemnt_row {
+  padding: 20px;
 }
 </style>
