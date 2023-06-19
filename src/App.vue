@@ -48,11 +48,14 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   min-height: 100vh;
+  background-image: url("../src/pages/.src/assets/pictures/background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
 
 }
 
 #nav {
-  padding: 30px;
+  padding: 29px;
   display: flex;
   justify-content: space-between;
   align-items: center;
