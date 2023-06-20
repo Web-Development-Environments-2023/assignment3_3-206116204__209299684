@@ -2,7 +2,6 @@
   <div id="app">
     <div id="nav">
       <div class="nav-left" style="font-size: 16px;color:white">
-
         <router-link :to="{ name: 'main' }" style="color: white"> Home |  </router-link>
         <router-link :to="{ name: 'search' }" style="color: white"> Search | </router-link>
         <router-link :to="{ name: 'about' }" style="color: white">About </router-link>
@@ -42,16 +41,21 @@ export default {
 <style lang="scss">
 @import '../src/pages/.src/assets/style.css';
 
+html, body {
+  height: 100%;
+  margin: 0;
+  background-image: url("../src/pages/.src/assets/pictures/background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   min-height: 100vh;
-  background-image: url("../src/pages/.src/assets/pictures/background.jpg");
-  background-size: cover;
-  background-repeat: no-repeat;
-
 }
 
 #nav {

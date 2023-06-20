@@ -131,6 +131,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .container {
-  max-width: 400px;
+  font-size: 18px;
+  width: 400px;
 }
 </style>

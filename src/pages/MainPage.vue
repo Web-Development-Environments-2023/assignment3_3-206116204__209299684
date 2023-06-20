@@ -15,19 +15,28 @@
         </div>
       </div>
       <b-button variant="info" @click="reloadPage">
-        <b-spinner type="grow" label="Loading..."></b-spinner> Refresh
+        <b-spinner type="grow" label="Loading..."></b-spinner>
+        Refresh
       </b-button>
     </b-container>
     <div id="Guest" v-if="!$root.store.username">
-      <LoginPage class="comp" style="margin-top: -700px; margin-left: 700px"></LoginPage>
+    <div class="login-container">
+        <LoginPage class="comp" style="margin-top: -170px;"></LoginPage>
+      </div>
     </div>
-    <div id="UserLoggedIn" v-else>
-      <h3 class="watched-badge">Show my last 3 Watched recipes:</h3>
-      <PreviewRecipe :recipe="LastWatch1" v-if="LastWatch1"></PreviewRecipe>
-      <PreviewRecipe :recipe="LastWatch2" v-if="LastWatch2"></PreviewRecipe>
-      <PreviewRecipe :recipe="LastWatch3" v-if="LastWatch3"></PreviewRecipe>
+      <div id="UserLoggedIn" v-else>
+        <b-container fluid class="recipe-container">
+          <h3 class="explore-badge">My last 3 Watched recipes</h3>
+          <div class="recipe-row">
+            <div class="recipe-column">
+              <PreviewRecipe :recipe="LastWatch1" v-if="LastWatch1"></PreviewRecipe>
+              <PreviewRecipe :recipe="LastWatch2" v-if="LastWatch2"></PreviewRecipe>
+              <PreviewRecipe :recipe="LastWatch3" v-if="LastWatch3"></PreviewRecipe>
+            </div>
+          </div>
+        </b-container>
+      </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -39,7 +48,7 @@ export default {
   components: {
     RandomRecipe,
     LoginPage,
-    PreviewRecipe,
+    PreviewRecipe
   },
   data() {
     return {
@@ -48,7 +57,7 @@ export default {
       RecipeRandom3: {},
       LastWatch1: "",
       LastWatch2: "",
-      LastWatch3: "",
+      LastWatch3: ""
     };
   },
   methods: {
@@ -83,18 +92,18 @@ export default {
       } catch (error) {
         console.log(error);
       }
-    },
+    }
   },
   mounted() {
     this.getRandom3Recipes();
     this.getUserLast3Watch();
-  },
+  }
 };
 </script>
 
 <style lang="scss" scoped>
 .container {
-  padding-top: 20px;
+  padding-bottom: 250px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -103,13 +112,24 @@ export default {
 }
 
 .recipe-container {
-  width: 600px;
-  margin-left: -50px;
+  width: 800px;
+  margin-left: -200px;
   padding: 30px;
   background-color: #212529;
   border-radius: 10px;
   color: black;
   font-family: "Agency FB", sans-serif;
+}
+
+.login-container {
+  width: 400px;
+  height: 500px;
+  background-color: #212529;
+  border-radius: 10px;
+  color: white;
+  font-family: "Agency FB", sans-serif;
+  margin-top: -600px;
+  margin-left: 800px;
 }
 
 .title {
@@ -121,25 +141,30 @@ export default {
 }
 
 .explore-badge {
-  color: #9eebcf;
+  color: white;
   font-family: "Agency FB", sans-serif;
-  font-size: 50px;
-  margin-left: 80px;
+  font-size: 60px;
+  margin-left: 150px;
   margin-top: -30px;
 }
 
 .watched-badge {
   margin-top: 30px;
-  color: #9eebcf;
+  color: white;
+  font-family: "Agency FB", sans-serif;
+  font-size: 60px;
+
 }
 
 .recipe-row {
   display: flex;
+  width: 750px;
   justify-content: space-between;
 }
 
 .recipe-column {
   width: 48%;
+  font-size: 20px;
 }
 
 .RandomRecipes {
@@ -151,16 +176,20 @@ export default {
 }
 
 .comp {
-  margin-top: -1300px;
+  margin-top: -1000px;
   margin-right: 50px;
+  height: 100px;
 }
 
 #UserLoggedIn {
-  margin-top: -1500px;
-  margin-left: 600px;
+  margin-top: -700px;
+  margin-left: 1100px;
+  width: 500px;
 }
 
 .elemnt_row {
   padding: 20px;
 }
+
+
 </style>
