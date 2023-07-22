@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h1 class="title">Register</h1>
+    <h1 class="title" style="color: white">Register</h1>
     <b-form @submit.prevent="onRegister" @reset.prevent="onReset">
       <b-form-group
         id="input-group-username"
@@ -21,7 +21,41 @@
           Username length should be between 3-8 characters long
         </b-form-invalid-feedback>
         <b-form-invalid-feedback v-if="!$v.form.username.alpha">
-          Username alpha
+          Username should contain only alphabetic characters
+        </b-form-invalid-feedback>
+      </b-form-group>
+
+      <b-form-group
+        id="input-group-firstname"
+        label-cols-sm="3"
+        label="First Name:"
+        label-for="firstname"
+      >
+        <b-form-input
+          id="firstname"
+          v-model="$v.form.firstName.$model"
+          type="text"
+          :state="validateState('firstName')"
+        ></b-form-input>
+        <b-form-invalid-feedback v-if="!$v.form.firstName.required">
+          First Name is required
+        </b-form-invalid-feedback>
+      </b-form-group>
+
+      <b-form-group
+        id="input-group-lastname"
+        label-cols-sm="3"
+        label="Last Name:"
+        label-for="lastname"
+      >
+        <b-form-input
+          id="lastname"
+          v-model="$v.form.lastName.$model"
+          type="text"
+          :state="validateState('lastName')"
+        ></b-form-input>
+        <b-form-invalid-feedback v-if="!$v.form.lastName.required">
+          Last Name is required
         </b-form-invalid-feedback>
       </b-form-group>
 
@@ -43,7 +77,7 @@
       </b-form-group>
 
       <b-form-group
-        id="input-group-Password"
+        id="input-group-password"
         label-cols-sm="3"
         label="Password:"
         label-for="password"
@@ -59,12 +93,12 @@
         </b-form-invalid-feedback>
         <b-form-text v-else-if="$v.form.password.$error" text-variant="info">
           Your password should be <strong>strong</strong>. <br />
-          For that, your password should be also:
+          For that, your password should also:
         </b-form-text>
         <b-form-invalid-feedback
           v-if="$v.form.password.required && !$v.form.password.length"
         >
-          Have length between 5-10 characters long
+          Have a length between 5-10 characters
         </b-form-invalid-feedback>
       </b-form-group>
 
@@ -90,17 +124,36 @@
         </b-form-invalid-feedback>
       </b-form-group>
 
-      <b-button type="reset" variant="danger">Reset</b-button>
+      <b-form-group
+        id="input-group-email"
+        label-cols-sm="3"
+        label="Email:"
+        label-for="email"
+      >
+        <b-form-input
+          id="email"
+          v-model="$v.form.email.$model"
+          type="email"
+          :state="validateState('email')"
+        ></b-form-input>
+        <b-form-invalid-feedback v-if="!$v.form.email.required">
+          Email is required
+        </b-form-invalid-feedback>
+        <b-form-invalid-feedback v-if="!$v.form.email.email">
+          Invalid email format
+        </b-form-invalid-feedback>
+      </b-form-group>
+
+      <b-button type="reset" variant="danger" style="font-size: 25px">Reset</b-button>
       <b-button
         type="submit"
         variant="primary"
-        style="width:250px;"
+        style="max-width:300px;padding-right: 20px;font-size: 25px"
         class="ml-5 w-75"
-        >Register</b-button
-      >
+      >Register</b-button>
       <div class="mt-2">
-        You have an account already?
-        <router-link to="login"> Log in here</router-link>
+        Already have an account?
+        <router-link to="login">Log in here</router-link>
       </div>
     </b-form>
     <b-alert
@@ -110,12 +163,8 @@
       dismissible
       show
     >
-      Register failed: {{ form.submitError }}
+      Registration failed: {{ form.submitError }}
     </b-alert>
-    <!-- <b-card class="mt-3 md-3" header="Form Data Result">
-      <pre class="m-0"><strong>form:</strong> {{ form }}</pre>
-      <pre class="m-0"><strong>$v.form:</strong> {{ $v.form }}</pre>
-    </b-card> -->
   </div>
 </template>
 
@@ -156,6 +205,12 @@ export default {
         length: (u) => minLength(3)(u) && maxLength(8)(u),
         alpha
       },
+      firstName: {
+        required
+      },
+      lastName: {
+        required
+      },
       country: {
         required
       },
@@ -166,45 +221,47 @@ export default {
       confirmedPassword: {
         required,
         sameAsPassword: sameAs("password")
+      },
+      email: {
+        required,
+        email
       }
     }
   },
   mounted() {
-    // console.log("mounted");
     this.countries.push(...countries);
-    // console.log($v);
   },
   methods: {
     validateState(param) {
       const { $dirty, $error } = this.$v.form[param];
       return $dirty ? !$error : null;
     },
-    async Register() {
+    async register() {
       try {
         const response = await this.axios.post(
-          // "https://test-for-3-2.herokuapp.com/user/Register",
           this.$root.store.server_domain + "/Register",
-
           {
             username: this.form.username,
-            password: this.form.password
+            firstName: this.form.firstName,
+            lastName: this.form.lastName,
+            country: this.form.country,
+            password: this.form.password,
+            confirmPassword: this.form.confirmedPassword,
+            email: this.form.email
           }
         );
-        this.$router.push("/login");
-        // console.log(response);
+        await this.$router.push("/login");
       } catch (err) {
         console.log(err.response);
         this.form.submitError = err.response.data.message;
       }
     },
     onRegister() {
-      // console.log("register method called");
       this.$v.form.$touch();
       if (this.$v.form.$anyError) {
         return;
       }
-      // console.log("register method go");
-      this.Register();
+      this.register();
     },
     onReset() {
       this.form = {
@@ -223,8 +280,17 @@ export default {
   }
 };
 </script>
+
 <style lang="scss" scoped>
 .container {
-  max-width: 500px;
+  max-width: 800px;
+  font-size: 25px;
+  width: 800px;
+  margin-top: 30px;
+  padding: 30px;
+  background-color: #212529;
+  border-radius: 10px;
+  color: white;
+  font-family: "Agency FB", sans-serif;
 }
 </style>

@@ -1,5 +1,8 @@
 <template>
   <div class="container">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
     <div v-if="recipe">
       <div class="recipe-header mt-3 mb-4">
         <h1>{{ recipe.title }}</h1>
@@ -10,7 +13,7 @@
           <div class="wrapped">
             <div class="mb-3">
               <div>Ready in {{ recipe.readyInMinutes }} minutes</div>
-              <div>Likes: {{ recipe.aggregateLikes }} likes</div>
+              <div>Likes: {{ recipe.popularity }} likes</div>
             </div>
             Ingredients:
             <ul>
@@ -22,13 +25,14 @@
               </li>
             </ul>
           </div>
-          <div class="wrapped">
+          <div class="wrapped" style="margin-top: 70px; margin-right: 200px">
             Instructions:
             <ol>
-              <li v-for="s in recipe._instructions" :key="s.number">
-                {{ s.step }}
+              <li v-for="(step, index) in parseInstructions(recipe.instructions)" :key="index">
+                {{ step }}
               </li>
             </ol>
+
           </div>
         </div>
       </div>
@@ -43,42 +47,72 @@
 
 <script>
 export default {
+  name:"RecipeViewPage",
+  props:{
+    id:{
+      type: Number,
+      required: false
+    }
+  },
+  mounted() {
+    this.indicateLastWatch();
+  },
+
+  methods: {
+    async indicateLastWatch(){
+      try {
+        console.log(this.id)
+        await this.axios.post(this.$root.store.server_domain+"/users/user_watched_recipe/" + this.id, null,{ withCredentials: true }
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    parseInstructions(htmlString) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlString, 'text/html');
+      const listItems = doc.querySelectorAll('ol > li');
+      const steps = [];
+
+      listItems.forEach((li) => {
+        steps.push(li.textContent.trim());
+      });
+
+      return steps;
+    },
+  },
+
   data() {
     return {
       recipe: null
     };
   },
   async created() {
+
     try {
       let response;
-      // response = this.$route.params.response;
-
       try {
-        response = await this.axios.get(
-          // "https://test-for-3-2.herokuapp.com/recipes/info",
-          this.$root.store.server_domain + "/recipes/info",
-          {
-            params: { id: this.$route.params.recipeId }
-          }
-        );
 
-        // console.log("response.status", response.status);
-        if (response.status !== 200) this.$router.replace("/NotFound");
+        console.log("the recipe id we got from params:")
+        console.log(this.id)
+        response = await this.axios.get(
+          this.$root.store.server_domain+"/recipes/recipeDetails/"+this.id
+        );
       } catch (error) {
         console.log("error.response.status", error.response.status);
-        this.$router.replace("/NotFound");
+        await this.$router.replace("/NotFound");
         return;
       }
-
+      this.recipe = response.data
       let {
         analyzedInstructions,
         instructions,
         extendedIngredients,
-        aggregateLikes,
+        popularity,
         readyInMinutes,
         image,
         title
-      } = response.data.recipe;
+      } = response.data;
 
       let _instructions = analyzedInstructions
         .map((fstep) => {
@@ -92,13 +126,14 @@ export default {
         _instructions,
         analyzedInstructions,
         extendedIngredients,
-        aggregateLikes,
+        popularity,
         readyInMinutes,
         image,
         title
       };
 
       this.recipe = _recipe;
+
     } catch (error) {
       console.log(error);
     }
@@ -107,6 +142,13 @@ export default {
 </script>
 
 <style scoped>
+.container{
+  font-family: 'Russo One', sans-serif;
+//font-weight: bold;
+  color: white;
+  background-color: #2c3e50;
+  font-size: 20px;
+}
 .wrapper {
   display: flex;
 }
